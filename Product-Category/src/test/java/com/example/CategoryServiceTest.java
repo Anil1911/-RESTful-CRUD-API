@@ -8,9 +8,15 @@ import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
+
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
 class CategoryServiceTest {
@@ -44,5 +50,56 @@ class CategoryServiceTest {
         }
     }
 
+    @Test
+    void testGetCategoryById() {
+        Long categoryId = 1L;
+        Category category = new Category(categoryId, "Category 1", "Description 1", new ArrayList<>());
 
+        when(categoryRepository.findById(categoryId)).thenReturn(Optional.of(category));
+
+        Category result = categoryService.getCategoryById(categoryId);
+
+        assertNotNull(result);
+        assertEquals(categoryId, result.getCategory_id());
+        assertEquals("Category 1", result.getName());
+        assertEquals("Description 1", result.getDescription());
+    }
+
+    @Test
+    void testCreateCategory() {
+        Category category = new Category(1L, "Category 1", "Description 1", new ArrayList<>());
+
+        when(categoryRepository.save(any(Category.class))).thenReturn(category);
+
+        Category result = categoryService.createCategory(category);
+
+        assertNotNull(result);
+        assertEquals(category, result);
+    }
+
+    @Test
+    void testUpdateCategory() {
+        Long categoryId = 1L;
+        Category existingCategory = new Category(categoryId, "Category 1", "Description 1", new ArrayList<>());
+        Category updatedCategory = new Category(categoryId, "Updated Category", "Updated Description", new ArrayList<>());
+
+        when(categoryRepository.findById(categoryId)).thenReturn(Optional.of(existingCategory));
+        when(categoryRepository.save(any(Category.class))).thenReturn(updatedCategory);
+
+        Category result = categoryService.updateCategory(categoryId, updatedCategory);
+
+        assertNotNull(result);
+        assertEquals("Updated Category", result.getName());
+        assertEquals("Updated Description", result.getDescription());
+    }
+
+    @Test
+    void testDeleteCategory() {
+        Long categoryId = 1L;
+        Category category = new Category(categoryId, "Category 1", "Description 1", new ArrayList<>());
+
+        when(categoryRepository.findById(categoryId)).thenReturn(Optional.of(category));
+
+        assertDoesNotThrow(() -> categoryService.deleteCategory(categoryId));
+    }
 }
